@@ -14,7 +14,10 @@ defmodule Hexerei.Application do
       }
     ]
 
-    opts = [strategy: :one_for_one, name: Hexerei.Supervisor]
-    Supervisor.start_link(children, opts)
+    CliSpinners.spin_fun([frames: :simple_dots_scrolling, text: "Starting Hexerei", done: "Started Hexerei"], fn ->
+      :timer.sleep(1000)
+      {:ok, _pid} = Supervisor.start_link(children, [strategy: :one_for_one, name: Hexerei.Supervisor])
+      end
+    )
   end
 end

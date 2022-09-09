@@ -2,24 +2,25 @@ defmodule Hexerei.Router do
   use Plug.Router
   use Plug.ErrorHandler
 
-  plug Api.Plug
-
   plug(Plug.Logger)
+
   plug(:match)
+
   plug(Plug.Parsers,
     parsers: [:json],
     pass: ["application/json"],
     json_decoder: Poison
   )
+
   plug(:dispatch)
 
   # Basic routes
   get "/" do
-    json_res(conn, 200, %{code: 200, message: "Hello World!"})
+    json_res(conn, 418, %{code: 418, message: "Do I look like a coffee pot to you??"})
   end
 
   get "/ping" do
-    send_resp(conn, 200, "pong!")
+    json_res(conn, 200, %{code: 200, message: "pong!"})
   end
 
   defp json_res(conn, status, res) do
@@ -30,10 +31,10 @@ defmodule Hexerei.Router do
   end
 
   # API routes
-  # get "/api/#{Application.get_env(:hexerei, :api_version)}/*", ApiController
+  forward("/api", to: Router.Api)
 
   # CDN routes
-  # get "/cdn/*", CdnController
+  forward("/cdn", to: Router.Cdn)
 
   # Handle Webhook events
   post "/events" do

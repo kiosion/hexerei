@@ -1,5 +1,5 @@
 import Mix.Config
 
 config :hexerei,
-  port: 8080,
+  port: 4000,
   api_version: "v1"
