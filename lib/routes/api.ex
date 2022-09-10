@@ -25,6 +25,22 @@ defmodule Router.Api do
     json_res(conn, 400, %{code: 400, message: "No version specified"})
   end
 
+  get "/test" do
+    case HTTPoison.get("https://kio.sh/") do
+      {:ok, %HTTPoison.Response{status_code: 418, body: body}} ->
+        :timer.sleep(1000)
+        IO.inspect body
+        json_res(conn, 200, %{code: 200, message: "Pog!"})
+      {:ok, %HTTPoison.Response{status_code: 404}} ->
+        :timer.sleep(1000)
+        json_res(conn, 404, %{code: 404, message: "Not found :("})
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        :timer.sleep(1000)
+        json_res(conn, 500, %{code: 500, message: "Something went wrong: #{reason}"})
+        IO.inspect reason
+    end
+  end
+
   get "/#{Application.get_env(:hexerei, :api_version)}/:path" do
     json_res(conn, 200, %{code: 200, message: "API is up!"})
   end

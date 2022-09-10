@@ -23,6 +23,7 @@ defmodule Hexerei.MixProject do
     [
       {:plug_cowboy, "~> 2.5"},
       {:poison, "~> 3.1"},
+      {:httpoison, "~> 1.8"},
       {:cli_spinners, "~> 0.1.0"}
     ]
   end
