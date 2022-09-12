@@ -61,7 +61,7 @@ defmodule Hexerei.Router do
 
   # Fallback route
   match _ do
-    json_res(conn, 404, %{code: 404, message: "Not Found"})
+    json_res(conn, 404, %{code: 404, message: "Resource not found or method not allowed"})
   end
 
   # Error handling
