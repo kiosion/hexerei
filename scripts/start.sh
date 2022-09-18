@@ -1,4 +1,4 @@
-#!/usr/bin/sh
+#!/bin/sh
 
 MODE="prod"
 optstring=":m:"
@@ -41,4 +41,5 @@ sleep 1
 
 # Start server w/ mix
 printf "\r"
+source ./.env
 MIX_ENV=$MODE mix run --no-halt

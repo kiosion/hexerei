@@ -1,35 +1,50 @@
 defmodule Hexerei.Plug.VerifyRequest do
-  defmodule IncompleteRequestError do
-    @moduledoc """
-    Error raised if a required field is missing.
-    """
+  import Plug.Conn
 
-    defexception message: "Incomplete request"
+  @api_token Application.compile_env!(:hexerei, :api_token)
+
+  def init(options) do
+    options
   end
 
-  defmodule UnauthorizedError do
-    @moduledoc """
-    Error raised if the request is unauthorized (missing or invalid token).
-    """
-
-    defexception message: "Unauthorized request"
+  def call(conn, _opts) do
+    conn
+    |> get_header()
+    |> verify_request()
   end
 
-  # def init(options), do: options
-
-  # def call(%Plug.Conn{request_path: path} = conn, opts) do
-  #   if path in opts[:paths], do: verify_request!(conn.params, opts[:fields])
-  #   conn
-  # end
-
-  defp verify_request!(params, fields) do
-    verified =
-      params
-      |> Map.keys()
-      |> contains_fields?(fields)
-
-    unless verified, do: raise(IncompleteRequestError)
+  defp get_header(conn) do
+    case get_req_header(conn, "authorization") do
+      [token] -> {conn, token}
+      _ -> {conn}
+    end
   end
 
-  defp contains_fields?(keys, fields), do: Enum.all?(fields, &(&1 in keys))
+  defp verify_request({conn, "Bearer " <> token}) do
+    token
+    |> verify_token()
+    |> case do
+      {:error, message} -> unauthorized(conn, message)
+      {:ok, _token} -> conn
+    end
+  end
+
+  defp verify_request({conn}) do
+    unauthorized(conn, "Missing authorization")
+  end
+
+  defp verify_token(token) do
+    case token == @api_token do
+      true -> {:ok, token}
+      false -> {:error, "Invalid authorization"}
+    end
+  end
+
+  defp unauthorized(conn, msg) do
+    conn
+    |> put_resp_content_type("application/json")
+    |> put_resp_header("cache-control", "no-cache")
+    |> send_resp(401, Poison.encode!(%{ code: 401, message: msg }))
+    |> halt()
+  end
 end

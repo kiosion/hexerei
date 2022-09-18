@@ -2,7 +2,17 @@ defmodule Hexerei.Router do
   use Plug.Router
   use Plug.ErrorHandler
 
-  plug(Plug.Logger)
+  if (Application.compile_env(:hexerei, :env)) == "dev" do
+    plug(Plug.Debugger)
+  else
+    plug(Plug.Logger)
+  end
+
+  # API routes
+  forward("/api", to: Router.Api)
+
+  # CDN routes
+  forward("/cdn", to: Router.Cdn)
 
   plug(:match)
 
@@ -29,12 +39,6 @@ defmodule Hexerei.Router do
     |> put_resp_header("cache-control", "no-cache")
     |> send_resp(status, Poison.encode!(res))
   end
-
-  # API routes
-  forward("/api", to: Router.Api)
-
-  # CDN routes
-  forward("/cdn", to: Router.Cdn)
 
   # Handle Webhook events
   post "/events" do
